@@ -278,10 +278,10 @@ def participation_rate_plot():
 
 def main():
     # Get response time from raw data file
-    # create_response_time_file() 
+    create_response_time_file() 
 
     # Get response time of system instance
-    # create_system_instance_time_file('lidar_republisher', 'twist_gate')
+    create_system_instance_time_file('lidar_republisher', 'twist_gate')
     
     # Get participation information of system instance
     create_participation_time_file()
