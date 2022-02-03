@@ -182,10 +182,10 @@ def get_participation_time_data(dir_path):
                 if(j >= len(node_data)): break
                 spin_start = float(node_data[j][2])
                 spin_end = float(node_data[j][3])
-                spin_response_time = float(node_data[j][6])
                 
                 if spin_start < participation.end and spin_end > participation.start:
-                    participation.times[node_idx] = participation.times[node_idx] + spin_response_time
+                    _time = min(spin_end, participation.end) - max(spin_start, participation.start)
+                    participation.times[node_idx] = participation.times[node_idx] + _time
                 elif spin_end > participation.end:
                     start_idx = j
                     break
@@ -223,6 +223,7 @@ def participation_time_plot():
     file = open(file_path)
 
     for node in node_name_list:
+        if node == 'system_instance': continue
         instances = []
         response_times = []
         participation_times = []
@@ -232,12 +233,15 @@ def participation_time_plot():
         for line in reader:
             if node not in line: continue
             instances.append(int(line[0]))
-            response_times.append(float(line[1]))
-            participation_times.append(float(line[3]))
-            participation_rates.append(float(line[4]))
+            response_times.append(float(line[1]) * 1000)
+            participation_times.append(float(line[3]) * 1000)
+            participation_rates.append(float(line[4]) * 1000)
         file.seek(0)
             
         plt.title(node)
+        plt.ylim(0.0, 500)
+        plt.xlabel('instance iteration')
+        plt.ylabel('participation time(ms)')
         plt.plot(instances[:-1], response_times[:-1], label='system instance')
         plt.plot(instances[:-1], participation_times[:-1], label=node)
 
@@ -252,6 +256,8 @@ def participation_rate_plot():
     file = open(file_path)
 
     for node in node_name_list:
+        if node == 'system_instance': continue
+
         instances = []
         response_times = []
         participation_times = []
@@ -270,10 +276,10 @@ def participation_rate_plot():
 
         plt.plot(instances[:-1], participation_rates[:-1])
         plt.ylim(0.0, 1.0)
-        plt.legend()
+        plt.xlabel('instance iteration')
+        plt.ylabel('participation rate')
         plt.legend()
         plt.savefig('graphs/participation_rate/'+node+'.jpg')
-        plt.close()
         plt.close()
 
 def main():
