@@ -182,13 +182,11 @@ def get_participation_time_data(dir_path):
                 if(j >= len(node_data)): break
                 spin_start = float(node_data[j][2])
                 spin_end = float(node_data[j][3])
-                
+
                 if spin_start < participation.end and spin_end > participation.start:
                     _time = min(spin_end, participation.end) - max(spin_start, participation.start)
                     participation.times[node_idx] = participation.times[node_idx] + _time
-                elif spin_end > participation.end:
-                    start_idx = j
-                    break
+
     
     for participation in participation_data:        
         for i in range(len(participation.times)):
