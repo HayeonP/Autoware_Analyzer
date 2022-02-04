@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from os import walk
 import csv
+import numpy as np
+import sys
 
 RUBIS_NO_INSTANCE = '0'
 
@@ -33,7 +35,10 @@ def get_node_name_list(dir_path):
     file_list = get_file_list_in_dir(dir_path)
     output = []
     for line in file_list:
-        output.append(line.split('.')[0])
+        node_name = line.split('.')[0]
+        if node_name == 'system_instance': continue
+        output.append(node_name)
+
     return output
 
 
@@ -71,7 +76,7 @@ def create_response_time_file():
 def get_data_from_csv(file):
     data = []
     reader = csv.reader(file)
-    for line in reader:
+    for line in reader: 
         data.append(line)
 
     return data
@@ -215,7 +220,7 @@ def create_participation_time_file():
     
     return
 
-def participation_time_plot():
+def plot_participation_time_per_node():
     file_path = 'files/participation.csv'
     node_name_list = get_node_name_list('files/response_time')
     file = open(file_path)
@@ -248,7 +253,7 @@ def participation_time_plot():
         plt.close()
     return
 
-def participation_rate_plot():
+def plot_participation_rate_per_node():
     file_path = 'files/participation.csv'
     node_name_list = get_node_name_list('files/response_time')
     file = open(file_path)
@@ -280,19 +285,103 @@ def participation_rate_plot():
         plt.savefig('graphs/participation_rate/'+node+'.jpg')
         plt.close()
 
+def plot_avg_participation():
+    file_path = 'files/participation.csv'
+    node_name_list = get_node_name_list('files/response_time')
+    file = open(file_path)
+
+    avg_time_list = []
+    avg_rate_list = []
+
+    # each node
+    for node in node_name_list:
+        if node == 'system_instance': continue 
+
+        instances = []
+        response_times = []
+        participation_times = []
+        participation_rates = []
+
+        reader = csv.reader(file)
+        for line in reader:
+            if node not in line: continue
+            instances.append(int(line[0]))
+            response_times.append(float(line[1]))
+            participation_times.append(float(line[3]) * 1000)
+            participation_rates.append(float(line[4]))
+        file.seek(0)
+        
+        avg_time_list.append(sum(participation_times)/len(participation_times))
+        avg_rate_list.append(sum(participation_rates)/len(participation_rates))
+    
+    # Get start instance number
+    next(reader)
+    start_instance = int(next(reader)[0])
+    
+    file_path = 'files/response_time/system_instance.csv'
+    file = open(file_path)
+    
+    # system instasnce
+    reader = csv.reader(file)
+    system_instance_avg_times = []
+    for line in reader:
+        if 'instance' in line: continue
+        if int(line[0]) < start_instance: continue
+        system_instance_avg_times.append(float(line[3]) * 1000)
+        
+    node_name_list.append('system_instance')
+    avg_time_list.append(sum(system_instance_avg_times)/len(system_instance_avg_times))
+    avg_rate_list.append(1.0)
+    
+    order = np.argsort(avg_time_list)
+    
+    node_name_list = [node_name_list[i] for i in order]
+    
+    avg_time_list = [avg_time_list[i] for i in order]
+    avg_rate_list = [avg_rate_list[i] for i in order]
+    
+    plt.figure(figsize=(19,8))
+    plt.barh(node_name_list, avg_time_list)
+    plt.xlim(0.0, 400.0)
+    plt.xlabel('Participatio Time(ms)')
+    plt.ylabel('Node name')
+    plt.title('Average Participation Time')
+    plt.savefig('graphs/participation_time.png')
+    
+    plt.close
+    
+    plt.figure(figsize=(19,8))
+    plt.barh(node_name_list, avg_rate_list)
+    plt.xlabel('Participatio Rate')
+    plt.ylabel('Node name')
+    plt.title('Average Participation Rate')
+    plt.savefig('graphs/participation_rate.png')
+    
+    plt.close
+    
+    
+    
+    return
+
+
 def main():
-    # Get response time from raw data file
+    ## Get response time from raw data file
     create_response_time_file() 
 
-    # Get response time of system instance
+    ## Get response time of system instance
     create_system_instance_time_file('lidar_republisher', 'twist_gate')
     
-    # Get participation information of system instance
+    ## Get participation information of system instance
     create_participation_time_file()
 
-    # Plot
-    participation_time_plot()
-    participation_rate_plot()
+    ## Plot
+    plot_participation_time_per_node()
+    plot_participation_rate_per_node()
+    plot_avg_participation()
+
+
+
+
 
     # <Profiling>
     # [1]   system instance -> # / start / end / response time
@@ -301,7 +390,7 @@ def main():
     # [3]   participation rate -> almost same with [2]
     # [4]   instance overlap -> find duration of tartet instance which start before prev instances are done
 
-    # system_instance_list = get_system_instance_list(response_time_data_list)
+
 
 
     return
