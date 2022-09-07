@@ -368,16 +368,16 @@ def main():
     ## Get response time from raw data file
     create_response_time_file() 
 
-    ## Get response time of system instance
-    create_system_instance_time_file('lidar_republisher', 'twist_gate')
+    # ## Get response time of system instance
+    # create_system_instance_time_file('lidar_republisher', 'twist_gate')
     
     ## Get participation information of system instance
-    create_participation_time_file()
+    # create_participation_time_file()
 
     ## Plot
-    plot_participation_time_per_node()
-    plot_participation_rate_per_node()
-    plot_avg_participation()
+    # plot_participation_time_per_node()
+    # plot_participation_rate_per_node()
+    # plot_avg_participation()
 
 
 
