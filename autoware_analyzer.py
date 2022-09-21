@@ -365,23 +365,23 @@ def plot_avg_participation():
 
 
 def main():
+    # input: Bane of start and end node
+    start_node = 'voxel_grid_filter'
+    end_node = 'twist_gate'
+
     ## Get response time from raw data file
     create_response_time_file() 
 
-    # ## Get response time of system instance
-    # create_system_instance_time_file('lidar_republisher', 'twist_gate')
+    ## Get response time of system instance
+    create_system_instance_time_file(start_node, end_node)
     
-    ## Get participation information of system instance
-    # create_participation_time_file()
+    # Get participation information of system instance
+    create_participation_time_file()
 
-    ## Plot
-    # plot_participation_time_per_node()
-    # plot_participation_rate_per_node()
-    # plot_avg_participation()
-
-
-
-
+    # Plot
+    plot_participation_time_per_node()
+    plot_participation_rate_per_node()
+    plot_avg_participation()
 
     # <Profiling>
     # [1]   system instance -> # / start / end / response time
